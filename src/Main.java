@@ -50,7 +50,6 @@
         arr2.set(0, 1234); // this compiles fine.
         arr2.set(1, new EntryNode<>(123, 456));
 
-
   -> worst case will be log n due to treeify operation (treeify threshold for a bucket)
 
   -> for(Map.Entry<K,V> entryElement : customMap.entrySet()> {
@@ -156,7 +155,6 @@ class CustomHashMap<K, V> {
         private V value;
         private EntryNode<K,V> next;
         EntryNode(K key, V value) {
-            EntryNode<String,Integer>[] entryNodes = new EntryNode[100];
             this.key = key;
             this.value = value;
             this.next = null;
@@ -192,8 +190,7 @@ class CustomHashMap<K, V> {
         Dog[] dogs = new Dog[10];
         Animal[] animals = dogs;  // this compiles fine. But it can lead to runtime issues
 
-        Invariant = If Dog is a subtype of Animal, then in an invariant system: You CANNOT assign a List<Dog> to a List<Animal> reference and vice versa.
-                    Both directions are blocked!
+        Invariant = If Dog is a subtype of Animal, then in an invariant system: You CANNOT assign a List<Dog> to a List<Animal> reference.
 
         Lists are INVARIANT
         List<Dog> dogs = new ArrayList<>();
@@ -226,20 +223,6 @@ class CustomHashMap<K, V> {
         Pre-generics legacy - already covariant ✅
         If generics were allowed with arrays, you'd get runtime exceptions through normal, legal operations ✅
 
-        Current array behavior (without generics):
-        Dog[] d = new Dog[10];
-        Animal[] a = d;        // Legal covariance
-        a[0] = new Cat();      // ArrayStoreException (but at least it fails fast!)
-
-        Hypothetical generic arrays (why it's banned):
-        List<Dog>[] d = new List<Dog>[10];     // If this were allowed...
-        List<Animal>[] a = d;                  // Would be legal (covariance)
-        a[0] = new ArrayList<Cat>();           // Would compile!
-        // Later: ClassCastException when accessing as List<Dog>
-
-        Collections: Danger requires explicit rule-breaking (raw types)
-        Arrays: Danger would come from normal, everyday array operations
-
         Java's solution: "Rather than change how arrays work (breaking old code), just don't allow generic arrays at all."
 
         Assume A is the parent of B
@@ -262,14 +245,13 @@ class CustomHashMap<K, V> {
 
         So why does everything post-generics, post-compilation still revolve around raw types?
 
-        1: Raw Type Support for Old .class Files
+        1: Raw Type Support for old .class Files
             -> New JVMs must support raw types to run existing pre-Java 5 .class files without modification
         2: Type Erasure Minimizes JVM Changes
             -> By erasing to raw types, the JVM runtime engine needed very few changes since it's still just dealing with the same old raw type bytecode
 
         Type erasure was an engineering compromise that achieved maximum compatibility with minimum JVM changes.
         The compiler does all the heavy lifting (type checking + cast insertion), while the runtime stays mostly the same.
-
     */
 
     CustomHashMap() {
@@ -364,6 +346,16 @@ class CustomHashMap<K, V> {
     }
 }
 
+
+class Outer<A> {
+    class Inner<B> {
+
+    }
+}
+
+
+
+
 public class Main {
     public static void main(String[] args) {
         CustomHashMap<String, Integer> customHashMap = new CustomHashMap<>();
@@ -393,6 +385,7 @@ public class Main {
          */
 
         for(CustomHashMap.EntryNode<String, Integer> entryNode: customHashMap.entrySet()) {
+            // The above line could also be for(Map.Entry<String,Integer> entryNode, since EntryNode implements from Map.Entry
             System.out.println("Key: " + entryNode.getKey());
             System.out.println("Value: " + entryNode.getValue());
         }
